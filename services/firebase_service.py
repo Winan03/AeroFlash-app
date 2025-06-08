@@ -1,26 +1,18 @@
-import firebase_admin
-from firebase_admin import credentials, db
-import os
-import json
-from datetime import datetime, timedelta
-from typing import Dict, List, Optional, Any
-from collections import defaultdict
+from firebase_admin import credentials, db, initialize_app
+from google.oauth2 import service_account
 
 class FirebaseService:
     def __init__(self):
-        """Inicializar conexión con Firebase"""
         try:
             if not firebase_admin._apps:
-                # Cargar credenciales desde archivo JSON
-                cred_path = os.getenv('FIREBASE_CREDENTIALS_PATH', './firebase-credentials.json')
-                
-                if os.path.exists(cred_path):
-                    cred = credentials.Certificate(cred_path)
+                if os.getenv("FIREBASE_CREDENTIALS_PATH") and os.path.exists(os.getenv("FIREBASE_CREDENTIALS_PATH")):
+                    # Carga local
+                    cred = credentials.Certificate(os.getenv("FIREBASE_CREDENTIALS_PATH"))
                 else:
-                    # Cargar desde variables de entorno si no existe el archivo
+                    # Carga desde variables de entorno (Render)
                     cred_dict = {
                         "type": "service_account",
-                        "project_id": "sistema-predictivo-aereo",
+                        "project_id": os.getenv('FIREBASE_PROJECT_ID'),
                         "private_key_id": os.getenv('FIREBASE_PRIVATE_KEY_ID'),
                         "private_key": os.getenv('FIREBASE_PRIVATE_KEY', '').replace('\\n', '\n'),
                         "client_email": os.getenv('FIREBASE_CLIENT_EMAIL'),
@@ -31,15 +23,16 @@ class FirebaseService:
                         "client_x509_cert_url": os.getenv('FIREBASE_CLIENT_CERT_URL')
                     }
                     cred = credentials.Certificate(cred_dict)
-                
-                # Inicializar Firebase
-                firebase_admin.initialize_app(cred, {
-                    'databaseURL': os.getenv('FIREBASE_DATABASE_URL', 'https://sistema-predictivo-aereo-default-rtdb.firebaseio.com/')
+
+                # Inicializar
+                initialize_app(cred, {
+                    'databaseURL': os.getenv('FIREBASE_DATABASE_URL')
                 })
-            
+
+                print("✅ Firebase inicializado correctamente")
+
             self.db = db
-            print("✅ Firebase inicializado correctamente")
-            
+
         except Exception as e:
             print(f"❌ Error inicializando Firebase: {str(e)}")
             raise
