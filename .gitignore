@@ -1,0 +1,21 @@
+﻿# Ignorar archivos y carpetas sensibles
+.env
+firebase-credentials.json
+
+# Entornos virtuales
+proyectos_venv/
+
+# Cachés de Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Configuraciones de editor
+.vscode/
+.idea/
+
+# Archivos temporales y logs
+*.log
+*.sqlite3
+*.bak
