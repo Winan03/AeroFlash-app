@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎫 Ticket de Vuelo - {{ reservation.codigo_ticket }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <!-- QR Code Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
+    <style>
+        .ticket-container {
+            max-width: 800px;
+            margin: 20px auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .ticket-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+            position: relative;
+        }
+        
+        .ticket-header::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 0;
+            right: 0;
+            height: 20px;
+            background: radial-gradient(circle at 10px 0, transparent 10px, white 10px),
+                        radial-gradient(circle at -10px 0, transparent 10px, white 10px);
+            background-size: 20px 20px;
+            background-position: 0 0, 10px 0;
+        }
+        
+        .airline-logo {
+            font-size: 3em;
+            margin-bottom: 10px;
+        }
+        
+        .ticket-code {
+            font-size: 2.5em;
+            font-weight: bold;
+            letter-spacing: 5px;
+            margin: 15px 0;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .ticket-body {
+            padding: 40px 30px;
+        }
+        
+        .flight-route {
+            text-align: center;
+            margin: 30px 0;
+            padding: 25px;
+            background: linear-gradient(135deg, #f8f9ff 0%, #e8eaff 100%);
+            border-radius: 15px;
+            border-left: 5px solid #667eea;
+        }
+        
+        .route-cities {
+            font-size: 2em;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .route-arrow {
+            font-size: 1.5em;
+            color: #667eea;
+            margin: 0 15px;
+        }
+        
+        .flight-date {
+            font-size: 1.2em;
+            color: #666;
+            margin-top: 10px;
+        }
+        
+        .ticket-sections {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin: 30px 0;
+        }
+        
+        .ticket-section {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 25px;
+            border-top: 4px solid #667eea;
+        }
+        
+        .section-title {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .section-title i {
+            color: #667eea;
+        }
+        
+        .info-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #e9ecef;
+        }
+        
+        .info-item:last-child {
+            border-bottom: none;
+        }
+        
+        .info-label {
+            font-weight: 600;
+            color: #555;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .info-value {
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .barcode-section {
+            text-align: center;
+            margin: 40px 0;
+            padding: 30px;
+            background: #fff;
+            border: 2px dashed #ccc;
+            border-radius: 10px;
+        }
+        
+        .barcode-container {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 30px;
+            margin: 20px 0;
+        }
+        
+        .qr-section, .barcode-text-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .qr-code {
+            border: 2px solid #333;
+            border-radius: 8px;
+            padding: 10px;
+            background: white;
+        }
+        
+        .barcode-display {
+            font-family: 'Courier New', monospace;
+            font-size: 1.8em;
+            letter-spacing: 1px;
+            color: #000;
+            background: white;
+            padding: 15px;
+            border: 2px solid #333;
+            border-radius: 5px;
+            word-break: break-all;
+            max-width: 300px;
+        }
+        
+        .scan-instruction {
+            font-size: 0.9em;
+            color: #666;
+            font-style: italic;
+        }
+        
+        .ticket-footer {
+            background: #f8f9fa;
+            padding: 25px;
+            text-align: center;
+            border-top: 1px solid #e9ecef;
+        }
+        
+        .important-info {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        
+        .important-info h4 {
+            color: #856404;
+            margin: 0 0 10px 0;
+        }
+        
+        .important-info p {
+            color: #856404;
+            margin: 5px 0;
+        }
+        
+        .action-buttons {
+            margin: 30px 0;
+            text-align: center;
+            gap: 15px;
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+        
+        .btn-home {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            font-size: 1.1em;
+            padding: 15px 30px;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        
+        .status-badge {
+            background: #28a745;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: bold;
+            display: inline-block;
+            margin: 10px 0;
+        }
+        
+        @media (max-width: 768px) {
+            .ticket-sections {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            .route-cities {
+                font-size: 1.5em;
+            }
+            
+            .ticket-code {
+                font-size: 2em;
+                letter-spacing: 3px;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .btn {
+                width: 200px;
+                justify-content: center;
+            }
+            
+            .barcode-container {
+                flex-direction: column;
+                gap: 20px;
+            }
+        }
+        
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+            
+            .ticket-container, .ticket-container * {
+                visibility: visible;
+            }
+            
+            .ticket-container {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                box-shadow: none;
+            }
+            
+            .action-buttons {
+                display: none;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="ticket-container">
+            <!-- Header del Ticket -->
+            <div class="ticket-header">
+                <div class="airline-logo">
+                    <i class="fas fa-plane"></i>
+                </div>
+                <h1>AeroFlash Airlines</h1>
+                <div class="ticket-code" id="ticketCode">{{ reservation.ticket_code }}</div>
+                <div class="status-badge">
+                    <i class="fas fa-check-circle"></i> Confirmado
+                </div>
+            </div>
+
+            <!-- Cuerpo del Ticket -->
+            <div class="ticket-body">
+                <!-- Ruta de Vuelo -->
+                <div class="flight-route">
+                    <div class="route-cities">
+                        {{ reservation.vuelo.origen }}
+                        <span class="route-arrow">
+                            <i class="fas fa-plane"></i>
+                        </span>
+                        {{ reservation.vuelo.destino }}
+                    </div>
+                    <div class="flight-date">
+                        <i class="fas fa-calendar-alt"></i>
+                        {{ reservation.vuelo.fecha }}
+                    </div>
+                </div>
+
+                <!-- Secciones de Información -->
+                <div class="ticket-sections">
+                    <!-- Información del Pasajero -->
+                    <div class="ticket-section">
+                        <div class="section-title">
+                            <i class="fas fa-user"></i>
+                            Información del Pasajero
+                        </div>
+                        
+                        <div class="info-item">
+                            <span class="info-label">
+                                <i class="fas fa-id-card"></i>
+                                Nombre:
+                            </span>
+                            <span class="info-value">{{ reservation.pasajero.nombre }}</span>
+                        </div>
+                        
+                        <div class="info-item">
+                            <span class="info-label">
+                                <i class="fas fa-id-badge"></i>
+                                DNI:
+                            </span>
+                            <span class="info-value">{{ reservation.pasajero.documento }}</span>
+                        </div>
+                        
+                        <div class="info-item">
+                            <span class="info-label">
+                                <i class="fas fa-venus-mars"></i>
+                                Género:
+                            </span>
+                            <span class="info-value">{{ reservation.pasajero.genero }}</span>
+                        </div>
+                        
+                        <div class="info-item">
+                            <span class="info-label">
+                                <i class="fas fa-envelope"></i>
+                                Email:
+                            </span>
+                            <span class="info-value">{{ reservation.pasajero.email }}</span>
+                        </div>
+                    </div>
+
+                    <!-- Detalles del Vuelo -->
+                    <div class="ticket-section">
+                        <div class="section-title">
+                            <i class="fas fa-plane-departure"></i>
+                            Detalles del Vuelo
+                        </div>
+                        
+                        <div class="info-item">
+                            <span class="info-label">
+                                <i class="fas fa-hashtag"></i>
+                                Vuelo:
+                            </span>
+                            <span class="info-value">{{ reservation.vuelo.numero_vuelo }}</span>
+                        </div>
+                        
+                        <div class="info-item">
+                            <span class="info-label">
+                                <i class="fas fa-clock"></i>
+                                Partida:
+                            </span>
+                            <span class="info-value">{{ reservation.vuelo.hora_partida }}</span>
+                        </div>
+                        
+                        <div class="info-item">
+                            <span class="info-label">
+                                <i class="fas fa-clock"></i>
+                                Llegada:
+                            </span>
+                            <span class="info-value">{{ reservation.vuelo.hora_llegada }}</span>
+                        </div>
+                        
+                        <div class="info-item">
+                            <span class="info-label">
+                                <i class="fas fa-star"></i>
+                                Clase:
+                            </span>
+                            <span class="info-value">{{ reservation.vuelo.clase }}</span>
+                        </div>
+                        
+                        <div class="info-item">
+                            <span class="info-label">
+                                <i class="fas fa-chair"></i>
+                                Asiento:
+                            </span>
+                            <span class="info-value">{{ reservation.vuelo.asiento }}</span>
+                        </div>
+                        
+                        <div class="info-item">
+                            <span class="info-label">
+                                <i class="fas fa-door-open"></i>
+                                Puerta:
+                            </span>
+                            <span class="info-value">{{ reservation.vuelo.puerta }}</span>
+                        </div>
+
+                        <div class="info-item">
+                            <span class="info-label">
+                                <i class="fas fa-dollar-sign"></i>
+                                Precio:
+                            </span>
+                            <span class="info-value">S/ {{ reservation.precio }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Código QR y Código de Barras -->
+                <div class="barcode-section">
+                    <h3><i class="fas fa-qrcode"></i> Códigos de Verificación</h3>
+                    
+                    <div class="barcode-container">
+                        <!-- QR Code -->
+                        <div class="qr-section">
+                            <canvas id="qr-code" class="qr-code"></canvas>
+                            <div class="scan-instruction">
+                                <strong>QR Code</strong><br>
+                                Escanea para verificar
+                            </div>
+                        </div>
+                        
+                        <!-- Código de Barras -->
+                        <div class="barcode-text-section">
+                            <div class="barcode-display" id="barcodeDisplay"></div>
+                            <div class="scan-instruction">
+                                <strong>Código de Barras</strong><br>
+                                Para lectores de aeropuerto
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <p><strong>Ticket ID:</strong> <span id="ticketId">{{ reservation.ticket_code }}</span></p>
+                </div>
+
+                <!-- Información Importante -->
+                <div class="important-info">
+                    <h4><i class="fas fa-exclamation-triangle"></i> Información Importante</h4>
+                    <p><strong>• Llegada recomendada:</strong> 2 horas antes para vuelos nacionales</p>
+                    <p><strong>• Documentos requeridos:</strong> DNI o Pasaporte vigente</p>
+                    <p><strong>• Equipaje de mano:</strong> Máximo 8kg</p>
+                    <p><strong>• Check-in online:</strong> Disponible 24 horas antes</p>
+                </div>
+
+                <!-- Botones de Acción -->
+                <div class="action-buttons">
+                    <!-- Botón destacado para volver al inicio -->
+                    <a href="{{ url_for('index') }}" class="btn btn-home">
+                        <i class="fas fa-home"></i>
+                        Página Principal
+                    </a>
+                    
+                    <button onclick="window.print()" class="btn btn-primary">
+                        <i class="fas fa-print"></i>
+                        Imprimir Ticket
+                    </button>
+                    
+                    <button onclick="generateNewCodes()" class="btn btn-secondary">
+                        <i class="fas fa-refresh"></i>
+                        Regenerar Códigos
+                    </button>
+                    
+                    <a href="{{ url_for('search_ticket_page') }}" class="btn btn-secondary">
+                        Buscar Ticket
+                    </a>
+
+                </div>
+            </div>
+
+            <!-- Footer del Ticket -->
+            <div class="ticket-footer">
+                <p><strong>Fecha de emisión:</strong> <span id="currentDate"></span></p>
+                <p><i class="fas fa-phone"></i> +51 1 234-5678 | <i class="fas fa-envelope"></i> info@aeroflash.com</p>
+                <p><i class="fas fa-globe"></i> www.aeroflash.com</p>
+                <hr style="margin: 15px 0; border: 1px dashed #ccc;">
+                <p style="font-size: 0.9em; color: #666;">
+                    &copy; 2025 AeroFlash Airlines. Todos los derechos reservados.
+                    <br>Este ticket es válido únicamente para el vuelo especificado.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Función para generar código de ticket único
+        function generateTicketCode() {
+            const prefix = 'AF';
+            const year = new Date().getFullYear();
+            const random = Math.floor(Math.random() * 999999).toString().padStart(6, '0');
+            return `${prefix}${year}${random}`;
+        }
+
+        // Función para generar código de barras simulado
+        function generateBarcode(text) {
+            // Convierte el texto a una representación de código de barras
+            let barcode = '';
+            for (let i = 0; i < text.length; i++) {
+                const char = text.charCodeAt(i);
+                // Simula patrones de barras basados en el código ASCII
+                barcode += (char % 2 === 0 ? '||' : '|') + (char % 3 === 0 ? '||' : '|');
+            }
+            return barcode + '|||||'; // Terminador
+        }
+
+        // Función para crear el QR code
+        function createQRCode(ticketCode) {
+            const qrData = {
+                airline: '{{ reservation.vuelo.aerolinea }}',
+                ticket: ticketCode,
+                passenger: '{{ reservation.pasajero.nombre }} {{ reservation.pasajero.apellido }}',
+                flight: '{{ reservation.vuelo.numero_vuelo }}',
+                route: '{{ reservation.vuelo.origen|upper }}-{{ reservation.vuelo.destino|upper }}',
+                date: '{{ reservation.vuelo.fecha }}',
+                seat: '{{ reservation.vuelo.asiento }}',
+                gate: '{{ reservation.vuelo.puerta }}',
+                timestamp: new Date().toISOString(),
+                precio: '{{ reservation.precio }}'
+
+            };
+
+            const qr = new QRious({
+                element: document.getElementById('qr-code'),
+                value: JSON.stringify(qrData),
+                size: 150,
+                level: 'M',
+                foreground: '#000000',
+                background: '#ffffff'
+            });
+        }
+
+        // Función para actualizar todos los códigos
+        function updateCodes() {
+            const ticketCode = generateTicketCode();
+            
+            // Actualizar elementos del DOM
+            document.getElementById('ticketCode').textContent = ticketCode;
+            document.getElementById('ticketId').textContent = ticketCode;
+            
+            // Generar y mostrar código de barras
+            const barcode = generateBarcode(ticketCode);
+            document.getElementById('barcodeDisplay').textContent = barcode;
+            
+            // Crear QR code
+            createQRCode(ticketCode);
+            
+            // Actualizar fecha actual
+            const now = new Date();
+            document.getElementById('currentDate').textContent = now.toLocaleDateString('es-PE');
+        }
+
+        // Función para regenerar códigos (botón)
+        function generateNewCodes() {
+            updateCodes();
+            
+            // Animación visual para mostrar que se regeneraron
+            const barcodeSection = document.querySelector('.barcode-section');
+            barcodeSection.style.transform = 'scale(0.95)';
+            barcodeSection.style.transition = 'transform 0.2s ease';
+            
+            setTimeout(() => {
+                barcodeSection.style.transform = 'scale(1)';
+            }, 200);
+        }
+
+        // Inicializar al cargar la página
+        document.addEventListener('DOMContentLoaded', function() {
+            updateCodes();
+        });
+    </script>
+</body>
+</html>

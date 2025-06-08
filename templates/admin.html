@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel Administrativo - AeroFlash</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <!-- Estilos personalizados -->
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .sidebar {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+        }
+        
+        .sidebar .list-group-item {
+            background: transparent;
+            border: none;
+            color: rgba(255,255,255,0.8);
+            transition: all 0.3s ease;
+            border-radius: 8px;
+            margin: 2px 0;
+        }
+        
+        .sidebar .list-group-item:hover,
+        .sidebar .list-group-item.active {
+            background-color: rgba(255,255,255,0.2);
+            color: white;
+            transform: translateX(5px);
+        }
+        
+        .main-content {
+            padding: 0;
+        }
+        
+        .content-section {
+            display: none;
+            animation: fadeIn 0.3s ease-in;
+        }
+        
+        .content-section.active {
+            display: block;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .navbar {
+            background: white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: transform 0.2s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .stats-card {
+            background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
+            color: white;
+        }
+        
+        .stats-card:nth-child(2) {
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+        }
+        
+        .stats-card:nth-child(3) {
+            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+        }
+        
+        .stats-card:nth-child(4) {
+            background: linear-gradient(135deg, #a8caba 0%, #5d4e75 100%);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 8px;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        
+        .table {
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .modal-content {
+            border-radius: 15px;
+            border: none;
+        }
+        
+        .form-control, .form-select {
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
+            transition: all 0.3s ease;
+        }
+        
+        .form-control:focus, .form-select:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        }
+        
+        .brand-logo {
+            font-weight: bold;
+            color: #667eea;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-md-3 col-lg-2 px-0">
+                <div class="sidebar p-3">
+                    <div class="text-center mb-4">
+                        <h4 class="text-white brand-logo">
+                            <i class="fas fa-plane"></i> AeroFlash
+                        </h4>
+                        <small class="text-white-50">Panel Administrativo</small>
+                    </div>
+                    
+                    <div class="list-group list-group-flush">
+                        <a href="#" class="list-group-item active" onclick="showSection('dashboard')">
+                            <i class="fas fa-tachometer-alt me-2"></i> Dashboard
+                        </a>
+                        <a href="#" class="list-group-item" onclick="showSection('flights')">
+                            <i class="fas fa-plane me-2"></i> Gestión de Vuelos
+                        </a>
+                        <a href="#" class="list-group-item" onclick="showSection('reservations')">
+                            <i class="fas fa-ticket-alt me-2"></i> Reservas
+                        </a>
+                        <a href="#" class="list-group-item" onclick="showSection('reports')">
+                            <i class="fas fa-chart-bar me-2"></i> Reportes
+                        </a>
+                    </div>
+                    
+                    <div class="mt-auto pt-3">
+                        <button class="btn btn-outline-light btn-sm w-100" onclick="logout()">
+                            <i class="fas fa-sign-out-alt me-2"></i> Cerrar Sesión
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Main Content -->
+            <div class="col-md-9 col-lg-10 main-content">
+                <!-- Top Navbar -->
+                <nav class="navbar navbar-expand-lg navbar-light bg-white mb-4">
+                    <div class="container-fluid">
+                        <span class="navbar-brand mb-0 h1">Panel Administrativo AeroFlash</span>
+                        <div class="navbar-nav ms-auto">
+                            <span class="nav-link">
+                                <i class="fas fa-user-circle me-2"></i>Administrador
+                            </span>
+                        </div>
+                    </div>
+                </nav>
+                
+                <!-- Dashboard Section -->
+                <div id="dashboard" class="content-section active">
+                    <div class="container-fluid">
+                        <h2 class="mb-4">Dashboard</h2>
+                        
+                        <!-- Stats Cards -->
+                        <div class="row mb-4">
+                            <div class="col-md-3 mb-3">
+                                <div class="card stats-card text-center p-3">
+                                    <i class="fas fa-plane fa-2x mb-2"></i>
+                                    <h3 id="total-flights">0</h3>
+                                    <p class="mb-0">Total Vuelos</p>
+                                </div>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <div class="card stats-card text-center p-3">
+                                    <i class="fas fa-ticket-alt fa-2x mb-2"></i>
+                                    <h3 id="total-reservations">0</h3>
+                                    <p class="mb-0">Total Reservas</p>
+                                </div>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <div class="card stats-card text-center p-3">
+                                    <i class="fas fa-calendar-alt fa-2x mb-2"></i>
+                                    <h3 id="upcoming-flights">0</h3>
+                                    <p class="mb-0">Vuelos Próximos</p>
+                                </div>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <div class="card stats-card text-center p-3">
+                                    <i class="fas fa-dollar-sign fa-2x mb-2"></i>
+                                    <h3 id="total-revenue">S/ 0</h3>
+                                    <p class="mb-0">Ingresos Total</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Quick Actions -->
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <h5 class="card-title">Acciones Rápidas</h5>
+                                        <div class="d-flex gap-2">
+                                            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#flightModal">
+                                                <i class="fas fa-plus me-2"></i>Crear Vuelo
+                                            </button>
+                                            <button class="btn btn-outline-primary" onclick="showSection('flights')">
+                                                <i class="fas fa-list me-2"></i>Ver Vuelos
+                                            </button>
+                                            <button class="btn btn-outline-success" onclick="showSection('reservations')">
+                                                <i class="fas fa-eye me-2"></i>Ver Reservas
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Flights Section -->
+                <div id="flights" class="content-section">
+                    <div class="container-fluid">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <h2>Gestión de Vuelos</h2>
+                            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#flightModal">
+                                <i class="fas fa-plus me-2"></i>Crear Vuelo
+                            </button>
+                        </div>
+                        
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table id="flights-table" class="table table-hover">
+                                        <thead class="table-dark">
+                                            <tr>
+                                                <th>Número Vuelo</th>
+                                                <th>Origen</th>
+                                                <th>Destino</th>
+                                                <th>Fecha</th>
+                                                <th>Horario</th>
+                                                <th>Precio</th>
+                                                <th>Asientos Disp.</th>
+                                                <th>Acciones</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <!-- Los vuelos se cargan dinámicamente -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Reservations Section -->
+                <div id="reservations" class="content-section">
+                    <div class="container-fluid">
+                        <h2 class="mb-4">Gestión de Reservas</h2>
+                        
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table id="reservations-table" class="table table-hover">
+                                        <thead class="table-dark">
+                                            <tr>
+                                                <th>ID Reserva</th>
+                                                <th>Pasajero</th>
+                                                <th>Vuelo</th>
+                                                <th>Fecha</th>
+                                                <th>Asiento</th>
+                                                <th>Estado</th>
+                                                <th>Precio</th>
+                                                <th>Acciones</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <!-- Las reservas se cargan dinámicamente -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Reports Section -->
+                <div id="reports" class="content-section">
+                    <div class="container-fluid">
+                        <h2 class="mb-4">Reportes y Estadísticas</h2>
+                        
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="card">
+                                    <div class="card-body text-center">
+                                        <i class="fas fa-chart-line fa-3x text-muted mb-3"></i>
+                                        <h5>Reportes en Desarrollo</h5>
+                                        <p class="text-muted">Esta sección estará disponible próximamente con gráficos detallados y estadísticas avanzadas.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal for Flight Form - FIXED VERSION -->
+    <div class="modal fade" id="flightModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Crear Nuevo Vuelo</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="flightForm">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="numero_vuelo" class="form-label">Número de Vuelo *</label>
+                                <input type="text" class="form-control" id="numero_vuelo" name="numero_vuelo" placeholder="Ej: AF1234" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="aerolinea" class="form-label">Aerolínea</label>
+                                <select class="form-select" id="aerolinea" name="aerolinea">
+                                    <option value="AeroFlash" selected>AeroFlash</option>
+                                    <option value="LatamAir">LatamAir</option>
+                                    <option value="SkyPeru">SkyPeru</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="origen" class="form-label">Origen *</label>
+                                <select class="form-select" id="origen" name="origen" required>
+                                    <option value="">Seleccionar origen</option>
+                                    <option value="Lima">Lima</option>
+                                    <option value="Cusco">Cusco</option>
+                                    <option value="Arequipa">Arequipa</option>
+                                    <option value="Trujillo">Trujillo</option>
+                                    <option value="Piura">Piura</option>
+                                    <option value="Iquitos">Iquitos</option>
+                                    <option value="Chiclayo">Chiclayo</option>
+                                    <option value="Tacna">Tacna</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="destino" class="form-label">Destino *</label>
+                                <select class="form-select" id="destino" name="destino" required>
+                                    <option value="">Seleccionar destino</option>
+                                    <option value="Lima">Lima</option>
+                                    <option value="Cusco">Cusco</option>
+                                    <option value="Arequipa">Arequipa</option>
+                                    <option value="Trujillo">Trujillo</option>
+                                    <option value="Piura">Piura</option>
+                                    <option value="Iquitos">Iquitos</option>
+                                    <option value="Chiclayo">Chiclayo</option>
+                                    <option value="Tacna">Tacna</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label for="fecha" class="form-label">Fecha del Vuelo *</label>
+                                <input type="date" class="form-control" id="fecha" name="fecha" required>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="hora_salida" class="form-label">Hora de Salida *</label>
+                                <input type="time" name="hora_salida" id="hora_salida" class="form-control" required>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="duracion" class="form-label">Duración *</label>
+                                <select class="form-select" id="duracion" name="duracion" required>
+                                    <option value="">Seleccionar duración</option>
+                                    <option value="1h 15m">1h 15m</option>
+                                    <option value="1h 30m">1h 30m</option>
+                                    <option value="1h 45m">1h 45m</option>
+                                    <option value="2h 0m">2h 0m</option>
+                                    <option value="2h 30m">2h 30m</option>
+                                    <option value="3h 0m">3h 0m</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label for="clase" class="form-label">Clase *</label>
+                                <select class="form-select" id="clase" name="clase" required>
+                                    <option value="">Seleccionar clase</option>
+                                    <option value="Económica">Económica</option>
+                                    <option value="Ejecutiva">Ejecutiva</option>
+                                    <option value="Primera">Primera</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="precio" class="form-label">Precio (S/) *</label>
+                                <input type="number" class="form-control" id="precio" name="precio" step="0.01" min="0" placeholder="0.00" required>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="tipo_avion" class="form-label">Tipo de Avión</label>
+                                <select class="form-select" id="tipo_avion" name="tipo_avion">
+                                    <option value="Boeing 737">Boeing 737</option>
+                                    <option value="Airbus A320">Airbus A320</option>
+                                    <option value="Boeing 787">Boeing 787</option>
+                                    <option value="Airbus A330">Airbus A330</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="text-end">
+                            <button type="button" class="btn btn-secondary me-2" data-bs-dismiss="modal">Cancelar</button>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-2"></i>Guardar Vuelo
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    </div>
+    
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js">
+
+    </script>
+    
+    <script src="{{ url_for('static', filename='js/admin.js') }}"></script>
+</body>
+</html>

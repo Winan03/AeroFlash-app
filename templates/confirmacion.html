@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AeroFlash - Confirmación de Reserva</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="{{ url_for('index') }}">
+                <i class="fas fa-plane"></i> AeroFlash
+            </a>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link" href="{{ url_for('index') }}">
+                    <i class="fas fa-home"></i> Inicio
+                </a>
+                <a class="nav-link" href="{{ url_for('search_ticket_page') }}">
+                    <i class="fas fa-search"></i> Buscar Vuelos
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-5">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <!-- Success Alert -->
+                <div class="alert alert-success text-center mb-4" role="alert">
+                    <div class="mb-3">
+                        <i class="fas fa-check-circle fa-4x text-success"></i>
+                    </div>
+                    <h4 class="alert-heading">¡Reserva Confirmada!</h4>
+                    <p class="mb-0">Tu reserva ha sido procesada exitosamente. A continuación encontrarás los detalles de tu vuelo.</p>
+                </div>
+
+                <!-- Ticket Details Card -->
+                <div class="card shadow-lg">
+                    <div class="card-header bg-primary text-white">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0">
+                                <i class="fas fa-ticket-alt"></i> Detalles de tu Reserva
+                            </h5>
+                            <span class="badge bg-success">CONFIRMADO</span>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        {% if reservation %}
+                        <!-- Booking Information -->
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <h6 class="text-muted">CÓDIGO DE RESERVA</h6>
+                                <h4 class="text-primary fw-bold">{{ reservation.ticket_code }}</h4>
+                            </div>
+                            <div class="col-md-6 text-end">
+                                <h6 class="text-muted">FECHA DE RESERVA</h6>
+                                <p class="mb-0">{{ reservation.fecha_reserva }}</p>
+                            </div>
+                        </div>
+
+                        <hr>
+
+                        <!-- Passenger Information -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h6 class="text-uppercase text-muted mb-3">
+                                    <i class="fas fa-user"></i> Información del Pasajero
+                                </h6>
+                            </div>
+                            <div class="col-md-6">
+                                <p><strong>Nombre:</strong> {{ reservation.pasajero.nombre }} {{ reservation.pasajero.apellido }}</p>
+                                <p><strong>Documento:</strong> {{ reservation.pasajero.documento }}</p>
+                            </div>
+                            <div class="col-md-6">
+                                <p><strong>Email:</strong> {{ reservation.pasajero.email }}</p>
+                                <p><strong>Teléfono:</strong> {{ reservation.pasajero.telefono }}</p>
+                            </div>
+                        </div>
+
+                        <hr>
+
+                        <!-- Flight Information -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h6 class="text-uppercase text-muted mb-3">
+                                    <i class="fas fa-plane"></i> Información del Vuelo
+                                </h6>
+                            </div>
+                        </div>
+
+                        <div class="flight-info-card">
+                            <div class="row align-items-center">
+                                <div class="col-md-3 text-center">
+                                    <div class="city-info">
+                                        <h5 class="mb-1">{{ reservation.vuelo.origen }}</h5>
+                                        <p class="text-muted mb-0">Origen</p>
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-6 text-center">
+                                    <div class="flight-path">
+                                        <div class="d-flex align-items-center justify-content-center">
+                                            <div class="flight-dot"></div>
+                                            <div class="flight-line"></div>
+                                            <i class="fas fa-plane flight-icon"></i>
+                                            <div class="flight-line"></div>
+                                            <div class="flight-dot"></div>
+                                        </div>
+                                        <div class="mt-2">
+                                            <small class="text-muted">{{ reservation.vuelo.duracion }}</small>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-3 text-center">
+                                    <div class="city-info">
+                                        <h5 class="mb-1">{{ reservation.vuelo.destino }}</h5>
+                                        <p class="text-muted mb-0">Destino</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <hr>
+
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <p class="mb-1"><strong>Vuelo:</strong></p>
+                                    <p class="text-primary">{{ reservation.vuelo.numero_vuelo }}</p>
+                                </div>
+                                <div class="col-md-3">
+                                    <p class="mb-1"><strong>Fecha:</strong></p>
+                                    <p>{{ reservation.vuelo.fecha }}</p>
+                                </div>
+                                <div class="col-md-3">
+                                    <p class="mb-1"><strong>Hora:</strong></p>
+                                    <p>{{ reservation.vuelo.hora_salida }}</p>
+                                </div>
+                                <div class="col-md-3">
+                                    <p class="mb-1"><strong>Asiento:</strong></p>
+                                    <p class="text-primary fw-bold">{{ reservation.vuelo.asiento }}</p>
+                                </div>
+                            </div>
+
+                            <hr>
+
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <p class="mb-1"><strong>Aerolínea:</strong></p>
+                                    <p>{{ reservation.vuelo.aerolinea }}</p>
+                                </div>
+                                <div class="col-md-4">
+                                    <p class="mb-1"><strong>Clase:</strong></p>
+                                    <p>{{ reservation.vuelo.clase }}</p>
+                                </div>
+                                <div class="col-md-4">
+                                    <p class="mb-1"><strong>Precio Total:</strong></p>
+                                    <h5 class="text-success mb-0">S/ {{ "%.2f"|format(reservation.precio) }}</h5>
+                                </div>
+                            </div>
+                        </div>
+
+                        {% else %}
+                        <div class="alert alert-warning">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            No se pudieron cargar los detalles de la reserva. Por favor, contacta con soporte.
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="text-center mt-4">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <button class="btn btn-outline-primary btn-lg w-100" onclick="window.print()">
+                                <i class="fas fa-print"></i> Imprimir
+                            </button>
+                        </div>
+                        <div class="col-md-4">
+                            <button class="btn btn-outline-success btn-lg w-100" onclick="downloadPDF()">
+                                <i class="fas fa-download"></i> Descargar PDF
+                            </button>
+                        </div>
+                        <div class="col-md-4">
+                            <button class="btn btn-outline-info btn-lg w-100" onclick="sendEmail()">
+                                <i class="fas fa-envelope"></i> Enviar por Email
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Important Information -->
+                <div class="card mt-4">
+                    <div class="card-header bg-warning text-dark">
+                        <h6 class="mb-0">
+                            <i class="fas fa-info-circle"></i> Información Importante
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <ul class="mb-0">
+                            <li>Presenta tu documento de identidad al momento del check-in</li>
+                            <li>Llega al aeropuerto al menos 2 horas antes del vuelo</li>
+                            <li>El check-in online está disponible 24 horas antes del vuelo</li>
+                            <li>Guarda tu código de reserva: <strong>{{ reservation.ticket_code if reservation else 'N/A' }}</strong></li>
+                            <li>Para cambios o cancelaciones, contacta con nuestra central de reservas</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Contact Information -->
+                <div class="card mt-4">
+                    <div class="card-body text-center">
+                        <h6>¿Necesitas ayuda?</h6>
+                        <p class="mb-2">
+                            <i class="fas fa-phone"></i> Central de Reservas: +51 1 234-5678
+                        </p>
+                        <p class="mb-2">
+                            <i class="fas fa-envelope"></i> Email: soporte@aeroflash.pe
+                        </p>
+                        <p class="mb-0">
+                            <i class="fas fa-clock"></i> Atención 24/7
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Return to Home -->
+                <div class="text-center mt-4 mb-5">
+                    <a href="{{ url_for('index') }}" class="btn btn-primary btn-lg">
+                        <i class="fas fa-home"></i> Volver al Inicio
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function downloadPDF() {
+            // Implementar descarga de PDF
+            alert('Función de descarga PDF en desarrollo');
+        }
+
+        function sendEmail() {
+            // Implementar envío por email
+            alert('Función de envío por email en desarrollo');
+        }
+
+        // Print styles
+        window.addEventListener('beforeprint', function() {
+            document.body.classList.add('print-mode');
+        });
+
+        window.addEventListener('afterprint', function() {
+            document.body.classList.remove('print-mode');
+        });
+    </script>
+</body>
+</html>

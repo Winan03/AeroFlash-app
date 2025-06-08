@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>✈️ AeroFlash Airlines - Reserva tu Vuelo</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <div class="logo">
+                <i class="fas fa-plane"></i>
+                <h1>AeroFlash Airlines</h1>
+            </div>
+            <p class="subtitle">Encuentra y reserva tu vuelo perfecto</p>
+            <nav class="nav-links">
+                <a href="/search-ticket" class="nav-link">
+                    <i class="fas fa-search"></i>
+                    Buscar Ticket
+                </a>
+                <a href="/admin" class="nav-link">
+                    <i class="fas fa-cog"></i>
+                    Admin
+                </a>
+            </nav>
+        </header>
+
+        <!-- Sección de Búsqueda de Vuelos -->
+        <div class="search-section">
+            <div class="search-header">
+                <h2><i class="fas fa-search"></i> Buscar Vuelos</h2>
+                <p>Encuentra el vuelo perfecto para tu próximo destino</p>
+            </div>
+
+            <form id="searchForm" class="search-form">
+                <div class="search-row">
+                    <div class="search-group">
+                        <label for="origen">
+                            <i class="fas fa-plane-departure"></i>
+                            Origen
+                        </label>
+                        <select id="origen" name="origen" required>
+                            <option value="">Seleccionar origen</option>
+                            <option value="lima">Lima (LIM)</option>
+                            <option value="cusco">Cusco (CUZ)</option>
+                            <option value="arequipa">Arequipa (AQP)</option>
+                            <option value="trujillo">Trujillo (TRU)</option>
+                            <option value="chiclayo">Chiclayo (CIX)</option>
+                            <option value="piura">Piura (PIU)</option>
+                            <option value="iquitos">Iquitos (IQT)</option>
+                            <option value="tacna">Tacna (TCQ)</option>
+                        </select>
+                    </div>
+
+                    <div class="search-group">
+                        <label for="destino">
+                            <i class="fas fa-plane-arrival"></i>
+                            Destino
+                        </label>
+                        <select id="destino" name="destino" required>
+                            <option value="">Seleccionar destino</option>
+                            <option value="lima">Lima (LIM)</option>
+                            <option value="cusco">Cusco (CUZ)</option>
+                            <option value="arequipa">Arequipa (AQP)</option>
+                            <option value="trujillo">Trujillo (TRU)</option>
+                            <option value="chiclayo">Chiclayo (CIX)</option>
+                            <option value="piura">Piura (PIU)</option>
+                            <option value="iquitos">Iquitos (IQT)</option>
+                            <option value="tacna">Tacna (TCQ)</option>
+                        </select>
+                    </div>
+
+                    <div class="search-group">
+                        <label for="fecha">
+                            <i class="fas fa-calendar-alt"></i>
+                            Fecha de Viaje
+                        </label>
+                        <input type="date" id="fecha" name="fecha" required>
+                    </div>
+
+                    <div class="search-group">
+                        <button type="submit" class="search-btn">
+                            <i class="fas fa-search"></i>
+                            Buscar Vuelos
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- Resultados de Búsqueda -->
+        <div id="searchResults" class="results-section" style="display: none;">
+            <div class="results-header">
+                <h3><i class="fas fa-list"></i> Vuelos Disponibles</h3>
+                <div id="resultsCount" class="results-count"></div>
+            </div>
+            <div id="flightsList" class="flights-list">
+                <!-- Los vuelos se cargarán aquí dinámicamente -->
+            </div>
+        </div>
+
+        <!-- Loading Spinner -->
+        <div id="loadingSpinner" class="loading-spinner" style="display: none;">
+            <i class="fas fa-spinner fa-spin"></i>
+            <p>Buscando vuelos disponibles...</p>
+        </div>
+
+        <!-- Sección de Características -->
+        <div class="features-section">
+            <h2><i class="fas fa-star"></i> ¿Por qué elegir AeroFlash?</h2>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <i class="fas fa-bolt"></i>
+                    <h3>Reserva Rápida</h3>
+                    <p>Proceso de reserva optimizado en menos de 3 minutos</p>
+                </div>
+                <div class="feature-card">
+                    <i class="fas fa-shield-alt"></i>
+                    <h3>Pago Seguro</h3>
+                    <p>Transacciones protegidas con la más alta seguridad</p>
+                </div>
+                <div class="feature-card">
+                    <i class="fas fa-headset"></i>
+                    <h3>Soporte 24/7</h3>
+                    <p>Atención al cliente disponible las 24 horas del día</p>
+                </div>
+                <div class="feature-card">
+                    <i class="fas fa-mobile-alt"></i>
+                    <h3>Check-in Móvil</h3>
+                    <p>Realiza tu check-in desde cualquier dispositivo</p>
+                </div>
+            </div>
+        </div>
+
+        <footer class="footer">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h4>Contacto</h4>
+                    <p><i class="fas fa-phone"></i> +51 1 234-5678</p>
+                    <p><i class="fas fa-envelope"></i> info@aeroflash.com</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Enlaces Rápidos</h4>
+                    <a href="/search-ticket">Buscar Ticket</a>
+                    <a href="/admin">Panel Admin</a>
+                </div>
+                <div class="footer-section">
+                    <h4>Síguenos</h4>
+                    <div class="social-links">
+                        <i class="fab fa-facebook"></i>
+                        <i class="fab fa-twitter"></i>
+                        <i class="fab fa-instagram"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; {{ current_year }} AeroFlash Airlines. Todos los derechos reservados.</p>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Modal de Reserva -->
+    <div id="bookingModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-ticket-alt"></i> Reservar Vuelo</h3>
+                <span class="close" onclick="closeBookingModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="bookingForm">
+                    <input type="hidden" id="selectedFlightId" name="flight_id">
+                    
+                    <div class="form-section">
+                        <h4><i class="fas fa-user"></i> Información del Pasajero</h4>
+                        
+                        <div class="form-group">
+                            <label for="nombre_completo">Nombre Completo *</label>
+                            <input type="text" id="nombre_completo" name="nombre_completo" required>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="dni">DNI *</label>
+                                <input type="text" id="dni" name="dni" required maxlength="8" pattern="[0-9]{8}">
+                            </div>
+                            <div class="form-group">
+                                <label for="correo">Correo Electrónico *</label>
+                                <input type="email" id="correo" name="correo" required>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="fecha_nacimiento">Fecha de Nacimiento</label>
+                                <input type="date" id="fecha_nacimiento" name="fecha_nacimiento">
+                            </div>
+                            <div class="form-group">
+                                <label for="genero">Género</label>
+                                <select id="genero" name="genero">
+                                    <option value="">Seleccionar</option>
+                                    <option value="Masculino">Masculino</option>
+                                    <option value="Femenino">Femenino</option>
+                                    <option value="Otro">Otro</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="telefono">Teléfono</label>
+                            <input type="tel" id="telefono" name="telefono">
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <h4><i class="fas fa-chair"></i> Selección de Asiento</h4>
+                        <div id="seatSelection" class="seat-selection">
+                            <!-- Los asientos se cargarán dinámicamente -->
+                        </div>
+                        <input type="hidden" id="selectedSeat" name="asiento">
+                    </div>
+
+                    <div class="modal-actions">
+                        <button type="button" class="btn-cancel" onclick="closeBookingModal()">
+                            Cancelar
+                        </button>
+                        <button type="submit" class="btn-confirm">
+                            <i class="fas fa-credit-card"></i>
+                            Confirmar Reserva
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Variables globales
+        let selectedFlight = null;
+        let availableSeats = [];
+
+        // Configurar fecha mínima
+        document.addEventListener('DOMContentLoaded', function() {
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('fecha').min = today;
+            document.getElementById('fecha_nacimiento').max = today;
+        });
+
+        // Manejar búsqueda de vuelos
+        document.getElementById('searchForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(e.target);
+            const searchData = {
+                origen: formData.get('origen'),
+                destino: formData.get('destino'),
+                fecha: formData.get('fecha')
+            };
+
+            // Validar que origen y destino sean diferentes
+            if (searchData.origen === searchData.destino) {
+                alert('El origen y destino deben ser diferentes');
+                return;
+            }
+
+            // Mostrar loading
+            document.getElementById('loadingSpinner').style.display = 'block';
+            document.getElementById('searchResults').style.display = 'none';
+
+            try {
+                const response = await fetch('/api/search_flights', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(searchData)
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    displayFlights(result.flights);
+                    document.getElementById('resultsCount').textContent = 
+                        `${result.count} vuelo${result.count !== 1 ? 's' : ''} encontrado${result.count !== 1 ? 's' : ''}`;
+                } else {
+                    alert('Error en la búsqueda: ' + result.error);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error al buscar vuelos. Inténtalo de nuevo.');
+            } finally {
+                document.getElementById('loadingSpinner').style.display = 'none';
+            }
+        });
+
+        // Mostrar vuelos encontrados
+        function displayFlights(flights) {
+            const flightsList = document.getElementById('flightsList');
+            
+            if (flights.length === 0) {
+                flightsList.innerHTML = `
+                    <div class="no-flights">
+                        <i class="fas fa-sad-tear"></i>
+                        <h3>No se encontraron vuelos</h3>
+                        <p>No hay vuelos disponibles para la ruta y fecha seleccionadas.</p>
+                        <p>Intenta con otra fecha o destino.</p>
+                    </div>
+                `;
+            } else {
+                flightsList.innerHTML = flights.map(flight => `
+                    <div class="flight-card">
+                        <div class="flight-header">
+                            <div class="flight-number">
+                                <i class="fas fa-plane"></i>
+                                ${flight.numero_vuelo || 'AF' + flight.id.slice(-4)}
+                            </div>
+                            <div class="flight-price">
+                                S/ ${flight.precio || '150.00'}
+                            </div>
+                        </div>
+                        
+                        <div class="flight-route">
+                            <div class="route-info">
+                                <div class="city">${flight.origen.toUpperCase()}</div>
+                                <div class="time">${flight.hora_partida}</div>
+                            </div>
+                            <div class="route-line">
+                                <i class="fas fa-plane"></i>
+                            </div>
+                            <div class="route-info">
+                                <div class="city">${flight.destino.toUpperCase()}</div>
+                                <div class="time">${flight.hora_llegada}</div>
+                            </div>
+                        </div>
+
+                        <div class="flight-details">
+                            <div class="detail-item">
+                                <i class="fas fa-calendar"></i>
+                                ${formatDate(flight.fecha)}
+                            </div>
+                            <div class="detail-item">
+                                <i class="fas fa-star"></i>
+                                ${flight.clase || 'Económica'}
+                            </div>
+                            <div class="detail-item">
+                                <i class="fas fa-chair"></i>
+                                ${flight.asientos_disponibles ? flight.asientos_disponibles.length : 0} asientos
+                            </div>
+                        </div>
+
+                        <div class="flight-actions">
+                            <button class="btn-book" onclick="openBookingModal('${flight.id}', ${JSON.stringify(flight).replace(/"/g, '&quot;')})">
+                                <i class="fas fa-ticket-alt"></i>
+                                Reservar
+                            </button>
+                        </div>
+                    </div>
+                `).join('');
+            }
+            
+            document.getElementById('searchResults').style.display = 'block';
+        }
+
+        // Abrir modal de reserva
+        async function openBookingModal(flightId, flightData) {
+            selectedFlight = typeof flightData === 'string' ? JSON.parse(flightData) : flightData;
+            document.getElementById('selectedFlightId').value = flightId;
+            
+            // Cargar asientos disponibles
+            await loadAvailableSeats(flightId);
+            
+            document.getElementById('bookingModal').style.display = 'block';
+        }
+
+        // Cerrar modal de reserva
+        function closeBookingModal() {
+            document.getElementById('bookingModal').style.display = 'none';
+            document.getElementById('bookingForm').reset();
+            selectedFlight = null;
+        }
+
+        // Cargar asientos disponibles
+        async function loadAvailableSeats(flightId) {
+            try {
+                const response = await fetch(`/api/available_seats/${flightId}`);
+                const result = await response.json();
+                
+                if (result.success) {
+                    availableSeats = result.available_seats;
+                    displaySeatMap();
+                }
+            } catch (error) {
+                console.error('Error cargando asientos:', error);
+            }
+        }
+
+        // Mostrar mapa de asientos
+        function displaySeatMap() {
+            const seatSelection = document.getElementById('seatSelection');
+            
+            if (availableSeats.length === 0) {
+                seatSelection.innerHTML = '<p>No hay asientos disponibles</p>';
+                return;
+            }
+
+            const seatRows = {};
+            availableSeats.forEach(seat => {
+                const row = seat.match(/\d+/)[0];
+                if (!seatRows[row]) seatRows[row] = [];
+                seatRows[row].push(seat);
+            });
+
+            let seatHtml = '<div class="seat-map">';
+            
+            // Mostrar solo los primeros 20 asientos para simplificar
+            const displaySeats = availableSeats.slice(0, 20);
+            
+            seatHtml += '<div class="seat-grid">';
+            displaySeats.forEach(seat => {
+                seatHtml += `
+                    <div class="seat available" onclick="selectSeat('${seat}')">
+                        ${seat}
+                    </div>
+                `;
+            });
+            seatHtml += '</div>';
+            
+            seatHtml += '</div>';
+            seatSelection.innerHTML = seatHtml;
+        }
+
+        // Seleccionar asiento
+        function selectSeat(seat) {
+            // Remover selección anterior
+            document.querySelectorAll('.seat.selected').forEach(s => s.classList.remove('selected'));
+            
+            // Seleccionar nuevo asiento
+            event.target.classList.add('selected');
+            document.getElementById('selectedSeat').value = seat;
+        }
+
+        // Manejar envío de reserva
+        document.getElementById('bookingForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            if (!document.getElementById('selectedSeat').value) {
+                alert('Por favor selecciona un asiento');
+                return;
+            }
+
+            const formData = new FormData(e.target);
+            const bookingData = Object.fromEntries(formData.entries());
+
+            try {
+                const response = await fetch('/api/book_flight', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(bookingData)
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    alert('¡Reserva realizada exitosamente!');
+                    window.location.href = result.redirect_url;
+                } else {
+                    alert('Error en la reserva: ' + result.error);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error al procesar la reserva. Inténtalo de nuevo.');
+            }
+        });
+
+        // Utilidades
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('es-PE', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+        }
+
+        // Validaciones
+        document.getElementById('dni').addEventListener('input', function(e) {
+            e.target.value = e.target.value.replace(/[^0-9]/g, '');
+        });
+
+        // Prevenir mismo origen y destino
+        document.getElementById('destino').addEventListener('change', function() {
+            const origen = document.getElementById('origen').value;
+            if (this.value === origen && origen !== '') {
+                alert('El destino debe ser diferente al origen');
+                this.value = '';
+            }
+        });
+
+        document.getElementById('origen').addEventListener('change', function() {
+            const destino = document.getElementById('destino').value;
+            if (this.value === destino && destino !== '') {
+                document.getElementById('destino').value = '';
+            }
+        });
+
+        // Cerrar modal al hacer clic fuera
+        window.addEventListener('click', function(event) {
+            const modal = document.getElementById('bookingModal');
+            if (event.target === modal) {
+                closeBookingModal();
+            }
+        });
+    </script>
+</body>
+</html>

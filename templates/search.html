@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔍 Buscar Ticket - AeroFlash</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .search-container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+            overflow: hidden;
+            max-width: 500px;
+            width: 100%;
+            position: relative;
+        }
+
+        .search-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .search-header h1 {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        .search-header p {
+            opacity: 0.9;
+            font-size: 1.1em;
+        }
+
+        .search-body {
+            padding: 40px 30px;
+        }
+
+        .search-form {
+            margin-bottom: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            font-size: 1.1em;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            text-align: center;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .search-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.2em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .search-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .search-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .search-info {
+            background: #e3f2fd;
+            border-left: 4px solid #2196f3;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 25px 0;
+        }
+
+        .search-info h4 {
+            color: #1976d2;
+            margin: 0 0 10px 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .search-info p {
+            color: #1976d2;
+            margin: 5px 0;
+        }
+
+        .example-codes {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 15px 0;
+        }
+
+        .example-code {
+            background: rgba(102, 126, 234, 0.1);
+            color: #667eea;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .example-code:hover {
+            background: #667eea;
+            color: white;
+            transform: scale(1.05);
+        }
+
+        .back-link {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .back-link a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: bold;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: color 0.3s ease;
+        }
+
+        .back-link a:hover {
+            color: #764ba2;
+        }
+
+        /* Modal de Error */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 15% auto;
+            padding: 0;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 450px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            animation: slideIn 0.3s ease;
+            overflow: hidden;
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .modal-header i {
+            font-size: 3em;
+            margin-bottom: 10px;
+            animation: shake 0.5s ease;
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            font-size: 1.5em;
+        }
+
+        .modal-body {
+            padding: 30px;
+            text-align: center;
+        }
+
+        .modal-body p {
+            font-size: 1.1em;
+            color: #555;
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+
+        .modal-body .error-code {
+            background: #f8f9fa;
+            border: 2px dashed #e9ecef;
+            padding: 15px;
+            border-radius: 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #e74c3c;
+            margin: 20px 0;
+            letter-spacing: 2px;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 25px;
+        }
+
+        .modal-btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .modal-btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .modal-btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .modal-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .close {
+            color: white;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            position: absolute;
+            right: 15px;
+            top: 15px;
+            opacity: 0.8;
+        }
+
+        .close:hover {
+            opacity: 1;
+        }
+
+        /* Modal de Éxito */
+        .modal-header.success {
+            background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
+        }
+
+        /* Animaciones */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideIn {
+            from { 
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to { 
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        /* Loading */
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .search-container {
+                margin: 10px;
+            }
+            
+            .modal-content {
+                width: 95%;
+                margin: 10% auto;
+            }
+            
+            .modal-buttons {
+                flex-direction: column;
+            }
+            
+            .modal-btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="search-container">
+        <div class="search-header">
+            <h1><i class="fas fa-search"></i> Buscar Ticket</h1>
+            <p>Ingresa tu código de ticket para ver los detalles</p>
+        </div>
+
+        <div class="search-body">
+            <form id="searchForm" class="search-form">
+                <div class="form-group">
+                    <label for="ticketCode">
+                        <i class="fas fa-ticket-alt"></i> Código de Ticket
+                    </label>
+                    <input 
+                        type="text" 
+                        id="ticketCode" 
+                        name="ticket_code" 
+                        placeholder="Ej: AF123456 o AF1234AB"
+                        required
+                        maxlength="10"
+                        title="Ingresa el código de tu ticket"
+                    >
+                </div>
+
+                <button type="submit" class="search-btn" id="searchBtn">
+                    <i class="fas fa-search"></i>
+                    <span>Buscar Ticket</span>
+                </button>
+            </form>
+
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p>Buscando tu ticket...</p>
+            </div>
+
+            <!-- Información de Ayuda -->
+            <div class="search-info">
+                <h4>
+                    <i class="fas fa-info-circle"></i>
+                    ¿Cómo encontrar tu código?
+                </h4>
+                <p>• El código aparece en tu correo de confirmación</p>
+                <p>• También está en la parte superior de tu ticket impreso</p>
+                <p>• Puede tener entre 6 y 10 caracteres alfanuméricos</p>
+                
+                <div class="example-codes">
+                    <span class="example-code" onclick="fillExample('AF1234AB')">AF1234AB</span>
+                    <span class="example-code" onclick="fillExample('AF123456')">AF123456</span>
+                    <span class="example-code" onclick="fillExample('AF9012EF')">AF9012EF</span>
+                </div>
+                <p style="font-size: 0.9em; color: #1976d2; margin-top: 10px; text-align: center;">
+                    * Códigos de ejemplo para pruebas
+                </p>
+            </div>
+
+            <div class="back-link">
+                <a href="/">
+                    <i class="fas fa-arrow-left"></i>
+                    Volver al Inicio
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Error -->
+    <div id="errorModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span class="close" onclick="closeModal()">&times;</span>
+                <i class="fas fa-exclamation-triangle"></i>
+                <h2>Ticket No Encontrado</h2>
+            </div>
+            <div class="modal-body">
+                <p>Lo sentimos, no pudimos encontrar un ticket con el código:</p>
+                <div class="error-code" id="errorCode"></div>
+                <p>Por favor, verifica que el código sea correcto e intenta nuevamente.</p>
+                
+                <div class="modal-buttons">
+                    <button class="modal-btn modal-btn-primary" onclick="closeModal()">
+                        <i class="fas fa-search"></i>
+                        Intentar de Nuevo
+                    </button>
+                    <button class="modal-btn modal-btn-secondary" onclick="contactSupport()">
+                        <i class="fas fa-headset"></i>
+                        Contactar Soporte
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Éxito -->
+    <div id="successModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header success">
+                <span class="close" onclick="closeModal()">&times;</span>
+                <i class="fas fa-check-circle"></i>
+                <h2>Ticket Encontrado</h2>
+            </div>
+            <div class="modal-body">
+                <p>¡Perfecto! Hemos encontrado tu ticket.</p>
+                <p>Serás redirigido a los detalles en unos segundos...</p>
+                
+                <div class="modal-buttons">
+                    <button id="btnVerTicket" class="modal-btn modal-btn-primary">
+                        <i class="fas fa-eye"></i>
+                        Ver Ticket Ahora
+                    </button>                    
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentTicketCode = '';
+
+        // Función para buscar ticket
+        document.getElementById('searchForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            const ticketCode = document.getElementById('ticketCode').value.trim().toUpperCase();
+            if (!ticketCode) {
+                showErrorModal(ticketCode, 'Por favor ingresa un código de ticket válido.');
+                return;
+            }
+
+            // Mostrar loading
+            showLoading(true);
+            currentTicketCode = ticketCode;
+
+            try {
+                const response = await fetch('/search_ticket', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ ticket_code: ticketCode })
+                });
+
+                const data = await response.json();
+
+                showLoading(false);
+
+                if (response.ok && data.success) {
+                    redirectUrl = data.redirect_url;
+                    showSuccessModal();  // Este modal ya redirige automáticamente
+                } else {
+                    showErrorModal(ticketCode, data.error || 'Ticket no encontrado.');
+                }
+
+            } catch (err) {
+                showLoading(false);
+                console.error(err);
+                showErrorModal(ticketCode, 'Error al conectar con el servidor.');
+            }
+        });
+
+
+        function showLoading(show) {
+            const loading = document.getElementById('loading');
+            const form = document.getElementById('searchForm');
+            const btn = document.getElementById('searchBtn');
+            
+            if (show) {
+                loading.style.display = 'block';
+                form.style.display = 'none';
+                btn.disabled = true;
+            } else {
+                loading.style.display = 'none';
+                form.style.display = 'block';
+                btn.disabled = false;
+            }
+        }
+
+        function showErrorModal(ticketCode, customMessage = null) {
+            const modal = document.getElementById('errorModal');
+            const errorCodeElement = document.getElementById('errorCode');
+            
+            errorCodeElement.textContent = ticketCode;
+            
+            if (customMessage) {
+                const modalBody = modal.querySelector('.modal-body p');
+                modalBody.textContent = customMessage;
+            }
+            
+            modal.style.display = 'block';
+            
+            // Auto-focus en el input cuando se cierre
+            setTimeout(() => {
+                document.getElementById('ticketCode').focus();
+            }, 100);
+        }
+
+        function showSuccessModal() {
+            const modal = document.getElementById('successModal');
+            modal.style.display = 'block';
+
+            const btn = document.getElementById('btnVerTicket');
+            if (btn) {
+                btn.onclick = redirectToTicket;
+            }
+
+            // Redirige automáticamente después de 3 segundos
+            setTimeout(() => {
+                redirectToTicket();
+            }, 3000);
+        }
+
+        function closeModal() {
+            document.getElementById('errorModal').style.display = 'none';
+            document.getElementById('successModal').style.display = 'none';
+            
+            // Limpiar el input y enfocar
+            const input = document.getElementById('ticketCode');
+            input.value = '';
+            input.focus();
+        }
+
+        function redirectToTicket() {
+            if (redirectUrl) {
+                window.location.href = redirectUrl;
+            } else {
+                alert("Error: No se pudo redirigir al ticket");
+            }
+        }
+
+        function contactSupport() {
+            // Aquí puedes agregar la lógica para contactar soporte
+            alert('Contactando soporte...\n\nTeléfono: +51 1 234-5678\nEmail: soporte@aeroflash.com');
+            closeModal();
+        }
+
+        // Función para llenar con código de ejemplo
+        function fillExample(code) {
+            document.getElementById('ticketCode').value = code;
+            document.getElementById('ticketCode').focus();
+        }
+
+        // Cerrar modal al hacer clic fuera
+        window.onclick = function(event) {
+            const errorModal = document.getElementById('errorModal');
+            const successModal = document.getElementById('successModal');
+            
+            if (event.target === errorModal) {
+                closeModal();
+            }
+            if (event.target === successModal) {
+                closeModal();
+            }
+        }
+
+        // Cerrar modal con ESC
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                closeModal();
+            }
+        });
+
+        // Auto-focus en el input al cargar la página
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('ticketCode').focus();
+        });
+
+        // Formatear input en tiempo real
+        document.getElementById('ticketCode').addEventListener('input', function(e) {
+            let value = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+            if (value.length > 10) {
+                value = value.substring(0, 10);
+            }
+            e.target.value = value;
+        });
+    </script>
+</body>
+</html>
