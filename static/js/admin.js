@@ -323,9 +323,14 @@ function renderFlightsTable() {
         const row = document.createElement('tr');
         
         // Calcular asientos disponibles de forma segura
-        const asientosDisponibles = Array.isArray(flight.asientos_disponibles) 
+        const disponibles = Array.isArray(flight.asientos_disponibles) 
             ? flight.asientos_disponibles.length 
             : 0;
+
+        const total = flight.total_asientos || (flight.asientos_totales ?? 0); // Ajusta según cómo guardas los totales
+        const totalAsientos = total || (Array.isArray(flight.asientos_disponibles) ? disponibles : 0); // fallback
+
+        const textoAsientos = `${disponibles} / ${totalAsientos}`;
         
         row.innerHTML = `
             <td>${escapeHtml(flight.numero_vuelo || flightId)}</td>
@@ -334,7 +339,7 @@ function renderFlightsTable() {
             <td>${formatDate(flight.fecha)}</td>
             <td>${escapeHtml(flight.hora_partida || '')} - ${escapeHtml(flight.hora_llegada || '')}</td>
             <td>S/ ${parseFloat(flight.precio || 0).toFixed(2)}</td>
-            <td>${asientosDisponibles}</td>
+            <td>${textoAsientos}</td>
             <td>
                 <button class="btn btn-sm btn-outline-primary" onclick="editFlight('${escapeHtml(flightId)}')" title="Editar">
                     <i class="fas fa-edit"></i>
@@ -537,14 +542,11 @@ async function deleteFlight(flightId) {
     }
 }
 
-// Función corregida para cargar reservas
 async function loadReservations() {
     try {
         console.log('🔄 Iniciando carga de reservas...');
-        
-        // Mostrar indicador de carga
         showLoadingState();
-        
+
         const response = await fetch(`${API_BASE_URL}/tickets`, {
             method: 'GET',
             headers: {
@@ -552,22 +554,22 @@ async function loadReservations() {
                 'Cache-Control': 'no-cache'
             }
         });
-        
+
         console.log('📡 Estado de respuesta:', response.status);
-        
+
         if (!response.ok) {
             if (response.status === 401) {
                 throw new Error('No autorizado. Por favor, inicia sesión como administrador.');
             }
             throw new Error(`Error HTTP ${response.status}: ${response.statusText}`);
         }
-        
+
         const data = await response.json();
         console.log('📦 Datos recibidos del servidor:', data);
-        
+
         if (data.success) {
             const firebaseTickets = data.tickets || {};
-            
+
             if (Object.keys(firebaseTickets).length === 0) {
                 console.log('📝 No hay tickets registrados');
                 reservasData = [];
@@ -575,14 +577,11 @@ async function loadReservations() {
                 showNotification('No hay reservas registradas en el sistema', 'info');
                 return;
             }
-            
-            // ✅ CONVERSIÓN CORRECTA DE DATOS
+
             reservasData = Object.entries(firebaseTickets).map(([ticketId, ticket]) => {
-                console.log(`🎫 Procesando ticket ${ticketId}:`, ticket);
-                
                 const pasajero = ticket.pasajero || {};
                 const vuelo = ticket.vuelo || {};
-                
+
                 return {
                     id: ticketId,
                     ticket_code: ticket.codigo_ticket || ticketId,
@@ -605,25 +604,27 @@ async function loadReservations() {
                     fecha_reserva: ticket.fecha_reserva || 'N/A'
                 };
             });
-            
+
             console.log(`🎫 ${reservasData.length} reservas procesadas exitosamente`);
             renderReservationsTable();
             updateReservationsStats();
             showNotification(`${reservasData.length} reservas cargadas exitosamente`, 'success');
-            
+
+            // 🟢 ✅ AÑADIR ESTA LÍNEA para actualizar los asientos disponibles
+            await loadFlights();
+
         } else {
             throw new Error(data.error || data.message || 'Error desconocido al obtener reservas');
         }
-        
+
     } catch (error) {
         console.error('❌ Error al cargar reservas:', error);
         showNotification(`Error al cargar reservas: ${error.message}`, 'error');
-        
-        // Mostrar tabla vacía en caso de error
         reservasData = [];
         renderReservationsTable();
     }
 }
+
 
 function updateReservationsStats() {
     const totalReservationsElement = document.getElementById('total-reservations');
@@ -797,6 +798,57 @@ function renderReservationsTable() {
     console.log(`📊 Tabla renderizada con ${reservasData.length} filas`);
 }
 
+// Función para formatear fechas de manera legible
+function formatDateTime(dateString) {
+    try {
+        const date = new Date(dateString);
+        
+        // Verificar si la fecha es válida
+        if (isNaN(date.getTime())) {
+            return dateString; // Retornar el string original si no es válida
+        }
+        
+        // Configurar opciones para el formato en español
+        const options = {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: false
+        };
+        
+        // Formatear la fecha en español
+        return date.toLocaleDateString('es-ES', options);
+    } catch (error) {
+        console.error('Error al formatear fecha:', error);
+        return dateString; // Retornar el string original en caso de error
+    }
+}
+
+// Función para formatear solo la fecha (sin hora)
+function formatDate(dateString) {
+    try {
+        const date = new Date(dateString);
+        
+        if (isNaN(date.getTime())) {
+            return dateString;
+        }
+        
+        const options = {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        };
+        
+        return date.toLocaleDateString('es-ES', options);
+    } catch (error) {
+        console.error('Error al formatear fecha:', error);
+        return dateString;
+    }
+}
+
+// Función actualizada para mostrar detalles de reserva
 function viewReservationDetails(reservationId) {
     const reserva = reservasData.find(r => r.id === reservationId);
     if (!reserva) {
@@ -804,75 +856,50 @@ function viewReservationDetails(reservationId) {
         return;
     }
     
-    // Crear modal con detalles
-    const modalHtml = `
-        <div class="modal fade" id="reservationDetailsModal" tabindex="-1">
-            <div class="modal-dialog modal-lg">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title">
-                            <i class="fas fa-ticket-alt me-2"></i>
-                            Detalles de Reserva - ${reserva.ticket_code}
-                        </h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                    </div>
-                    <div class="modal-body">
-                        <div class="row">
-                            <div class="col-md-6">
-                                <h6><i class="fas fa-user me-2"></i>Información del Pasajero</h6>
-                                <ul class="list-unstyled">
-                                    <li><strong>Nombre:</strong> ${reserva.nombre_pasajero}</li>
-                                    <li><strong>DNI:</strong> ${reserva.dni}</li>
-                                    <li><strong>Email:</strong> ${reserva.email}</li>
-                                    <li><strong>Teléfono:</strong> ${reserva.telefono}</li>
-                                </ul>
-                            </div>
-                            <div class="col-md-6">
-                                <h6><i class="fas fa-plane me-2"></i>Información del Vuelo</h6>
-                                <ul class="list-unstyled">
-                                    <li><strong>Vuelo:</strong> ${reserva.numero_vuelo}</li>
-                                    <li><strong>Ruta:</strong> ${reserva.origen} → ${reserva.destino}</li>
-                                    <li><strong>Fecha:</strong> ${reserva.fecha}</li>
-                                    <li><strong>Hora:</strong> ${reserva.hora_partida}</li>
-                                    <li><strong>Asiento:</strong> ${reserva.asiento}</li>
-                                    <li><strong>Clase:</strong> ${reserva.clase}</li>
-                                </ul>
-                            </div>
-                        </div>
-                        <hr>
-                        <div class="row">
-                            <div class="col-md-6">
-                                <h6><i class="fas fa-info-circle me-2"></i>Estado y Precio</h6>
-                                <ul class="list-unstyled">
-                                    <li><strong>Estado:</strong> 
-                                        <span class="badge ${getStatusBadgeClass(reserva.estado)}">${reserva.estado}</span>
-                                    </li>
-                                    <li><strong>Precio:</strong> S/ ${parseFloat(reserva.precio || 0).toFixed(2)}</li>
-                                    <li><strong>Fecha de Reserva:</strong> ${reserva.fecha_reserva}</li>
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-                        <button type="button" class="btn btn-primary" onclick="printTicket('${reserva.ticket_code}')">
-                            <i class="fas fa-print me-2"></i>Imprimir Ticket
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    `;
+    // Actualizar el contenido del modal
+    document.getElementById('reservation-code').textContent = reserva.ticket_code;
+    document.getElementById('passenger-name').textContent = reserva.nombre_pasajero;
+    document.getElementById('passenger-dni').textContent = reserva.dni;
+    document.getElementById('passenger-email').textContent = reserva.email;
+    document.getElementById('passenger-phone').textContent = reserva.telefono;
     
-    // Agregar modal al DOM y mostrarlo
-    document.body.insertAdjacentHTML('beforeend', modalHtml);
+    document.getElementById('flight-origin').textContent = reserva.origen;
+    document.getElementById('flight-destination').textContent = reserva.destino;
+    document.getElementById('flight-departure').textContent = reserva.hora_partida;
+    document.getElementById('flight-arrival').textContent = reserva.hora_llegada;
+    document.getElementById('flight-number').textContent = reserva.numero_vuelo;
+    
+    // Formatear la fecha del vuelo
+    document.getElementById('flight-date').textContent = formatDate(reserva.fecha);
+    
+    document.getElementById('flight-seat').textContent = reserva.asiento;
+    document.getElementById('flight-class').textContent = reserva.clase;
+    
+    document.getElementById('reservation-price').textContent = `S/ ${parseFloat(reserva.precio || 0).toFixed(2)}`;
+    
+    // Formatear la fecha de reserva con fecha y hora
+    document.getElementById('reservation-date').textContent = formatDateTime(reserva.fecha_reserva);
+    
+    document.getElementById('ticket-code').textContent = reserva.ticket_code;
+    
+    // Actualizar estado con clase apropiada
+    const statusElement = document.getElementById('reservation-status');
+    const statusClass = reserva.estado.toLowerCase();
+    statusElement.className = `status-badge ${statusClass}`;
+    statusElement.innerHTML = `<i class="fas fa-${getStatusIcon(reserva.estado)}"></i> ${reserva.estado}`;
+    
+    // Mostrar el modal
     const modal = new bootstrap.Modal(document.getElementById('reservationDetailsModal'));
     modal.show();
-    
-    // Limpiar modal cuando se cierre
-    document.getElementById('reservationDetailsModal').addEventListener('hidden.bs.modal', function() {
-        this.remove();
-    });
+}
+
+function getStatusIcon(status) {
+    switch(status.toLowerCase()) {
+        case 'confirmado': return 'check-circle';
+        case 'cancelado': return 'times-circle';
+        case 'pendiente': return 'clock';
+        default: return 'info-circle';
+    }
 }
 
 function printTicket(ticketCode) {

@@ -623,21 +623,32 @@ def get_ticket_api(ticket_code):
         }), 500
 
 @app.route('/api/available_seats/<flight_id>')
-def get_available_seats(flight_id):
-    """Obtener asientos disponibles para un vuelo"""
+def get_seat_availability(flight_id):
+    """Obtener todos los asientos y cuáles están ocupados"""
     try:
         flight = firebase_service.get_flight_by_id(flight_id)
-        
         if not flight:
-            return jsonify({'error': 'Vuelo no encontrado'}), 404
-        
+            return jsonify({'success': False, 'error': 'Vuelo no encontrado'}), 404
+
+        # Todos los posibles asientos
+        all_seats = flight.get('asientos_disponibles', []) + flight.get('asientos_ocupados', [])
+        all_seats = list(set(all_seats))  # Evitar duplicados
+
+        # Asientos ocupados = los que han sido reservados (están en 'asientos_ocupados')
+        occupied_seats = flight.get('asientos_ocupados', [])
+
+        # Asientos disponibles = todos menos los ocupados
+        available_seats = [s for s in all_seats if s not in occupied_seats]
+
         return jsonify({
             'success': True,
-            'available_seats': flight.get('asientos_disponibles', [])
+            'available_seats': flight.get('asientos_disponibles', []),
+            'occupied_seats': flight.get('asientos_ocupados', [])
         })
-        
+
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        return jsonify({'success': False, 'error': str(e)}), 500
+
 
 @app.route('/api/dashboard-stats')
 def get_dashboard_data():
@@ -760,7 +771,7 @@ def inject_globals():
     }
 
 if __name__ == '__main__':
-    port = int(os.getenv('PORT', 5000))
+    port = int(os.getenv('PORT', 5009))
     debug = os.getenv('FLASK_ENV') == 'development'
     
     print(f"🚀 Iniciando AeroFlash en puerto {port}")

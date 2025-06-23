@@ -44,13 +44,11 @@
                         <select id="origen" name="origen" required>
                             <option value="">Seleccionar origen</option>
                             <option value="lima">Lima (LIM)</option>
-                            <option value="cusco">Cusco (CUZ)</option>
                             <option value="arequipa">Arequipa (AQP)</option>
                             <option value="trujillo">Trujillo (TRU)</option>
-                            <option value="chiclayo">Chiclayo (CIX)</option>
+                            <option value="cajamarca">Cajamarca (CAJ)</option>
                             <option value="piura">Piura (PIU)</option>
-                            <option value="iquitos">Iquitos (IQT)</option>
-                            <option value="tacna">Tacna (TCQ)</option>
+                            <option value="puno">Puno (PUN)</option>
                         </select>
                     </div>
 
@@ -62,13 +60,11 @@
                         <select id="destino" name="destino" required>
                             <option value="">Seleccionar destino</option>
                             <option value="lima">Lima (LIM)</option>
-                            <option value="cusco">Cusco (CUZ)</option>
                             <option value="arequipa">Arequipa (AQP)</option>
                             <option value="trujillo">Trujillo (TRU)</option>
-                            <option value="chiclayo">Chiclayo (CIX)</option>
+                            <option value="cajamarca">Cajamarca (CAJ)</option>
                             <option value="piura">Piura (PIU)</option>
-                            <option value="iquitos">Iquitos (IQT)</option>
-                            <option value="tacna">Tacna (TCQ)</option>
+                            <option value="puno">Puno (PUN)</option>
                         </select>
                     </div>
 
@@ -388,6 +384,7 @@
                 
                 if (result.success) {
                     availableSeats = result.available_seats;
+                    selectedFlight.asientos_ocupados = result.occupied_seats || [];
                     displaySeatMap();
                 }
             } catch (error) {
@@ -398,44 +395,34 @@
         // Mostrar mapa de asientos
         function displaySeatMap() {
             const seatSelection = document.getElementById('seatSelection');
-            
-            if (availableSeats.length === 0) {
-                seatSelection.innerHTML = '<p>No hay asientos disponibles</p>';
-                return;
-            }
 
-            const seatRows = {};
-            availableSeats.forEach(seat => {
-                const row = seat.match(/\d+/)[0];
-                if (!seatRows[row]) seatRows[row] = [];
-                seatRows[row].push(seat);
+            if (!selectedFlight || !selectedFlight.asientos_disponibles) return;
+
+            const todosLosAsientos = selectedFlight.asientos_disponibles.concat(selectedFlight.asientos_ocupados || []);
+            const ocupados = selectedFlight.asientos_ocupados || [];
+
+            let seatHtml = '<div class="seat-map"><div class="seat-grid">';
+
+            todosLosAsientos.forEach(seat => {
+                const esOcupado = ocupados.includes(seat);
+                const clase = esOcupado ? 'seat occupied' : 'seat available';
+                const onclick = esOcupado ? '' : `onclick="selectSeat('${seat}')"`;
+
+                seatHtml += `<div class="${clase}" ${onclick}>${seat}</div>`;
             });
 
-            let seatHtml = '<div class="seat-map">';
-            
-            // Mostrar solo los primeros 20 asientos para simplificar
-            const displaySeats = availableSeats.slice(0, 20);
-            
-            seatHtml += '<div class="seat-grid">';
-            displaySeats.forEach(seat => {
-                seatHtml += `
-                    <div class="seat available" onclick="selectSeat('${seat}')">
-                        ${seat}
-                    </div>
-                `;
-            });
-            seatHtml += '</div>';
-            
-            seatHtml += '</div>';
+            seatHtml += '</div></div>';
             seatSelection.innerHTML = seatHtml;
         }
 
         // Seleccionar asiento
         function selectSeat(seat) {
-            // Remover selección anterior
+            if ((selectedFlight.asientos_ocupados || []).includes(seat)) {
+                alert('Este asiento ya está reservado. Por favor elige otro.');
+                return;
+            }
+
             document.querySelectorAll('.seat.selected').forEach(s => s.classList.remove('selected'));
-            
-            // Seleccionar nuevo asiento
             event.target.classList.add('selected');
             document.getElementById('selectedSeat').value = seat;
         }
@@ -443,6 +430,21 @@
         // Manejar envío de reserva
         document.getElementById('bookingForm').addEventListener('submit', async function(e) {
             e.preventDefault();
+
+            const nombre = document.getElementById('nombre_completo').value.trim();
+            const palabras = nombre.split(/\s+/);
+
+            if (palabras.length < 4) {
+                alert('Por favor, ingresa tu nombre completo con al menos 2 nombres y 2 apellidos.');
+                return;
+            }
+
+            // Validar teléfono
+            const telefono = document.getElementById('telefono').value.trim();
+            if (telefono.length !== 9 || !/^\d+$/.test(telefono)) {
+                alert('El teléfono debe tener exactamente 9 dígitos numéricos.');
+                return;
+            }
             
             if (!document.getElementById('selectedSeat').value) {
                 alert('Por favor selecciona un asiento');
@@ -505,6 +507,10 @@
             if (this.value === destino && destino !== '') {
                 document.getElementById('destino').value = '';
             }
+        });
+
+        document.getElementById('telefono').addEventListener('input', function (e) {
+            e.target.value = e.target.value.replace(/\D/g, '').slice(0, 9); // Solo números, máx 9 dígitos
         });
 
         // Cerrar modal al hacer clic fuera

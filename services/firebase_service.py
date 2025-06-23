@@ -629,21 +629,29 @@ class FirebaseService:
             return False
 
     def create_reservation(self, codigo_ticket: str, reservation_data: dict, flight_id: str, asiento: str) -> bool:
-        """Crear ticket y actualizar asientos disponibles del vuelo"""
+        """Crear ticket y registrar asiento como ocupado sin eliminarlo"""
         try:
             # Guardar la reserva (ticket)
             ref_ticket = self.db.reference(f'tickets/{codigo_ticket}')
             ref_ticket.set(reservation_data)
 
-            # Eliminar asiento reservado de la lista disponible
-            ref_asientos = self.db.reference(f'vuelos_programados/{flight_id}/asientos_disponibles')
-            asientos_actuales = ref_asientos.get()
+            # Referencias de asientos
+            ref_vuelo = self.db.reference(f'vuelos_programados/{flight_id}')
+            asientos_disponibles = ref_vuelo.child('asientos_disponibles').get() or []
+            asientos_ocupados = ref_vuelo.child('asientos_ocupados').get() or []
 
-            if asiento in asientos_actuales:
-                asientos_actuales.remove(asiento)
-                ref_asientos.set(asientos_actuales)
+            # Validar que esté disponible
+            if asiento in asientos_disponibles:
+                asientos_disponibles.remove(asiento)
+                asientos_ocupados.append(asiento)
+
+                # Guardar actualizaciones
+                ref_vuelo.update({
+                    'asientos_disponibles': asientos_disponibles,
+                    'asientos_ocupados': asientos_ocupados
+                })
             else:
-                print(f"⚠️ El asiento {asiento} no estaba disponible")
+                print(f"⚠️ El asiento {asiento} no estaba en la lista de disponibles")
 
             print(f"✅ Reserva creada: {codigo_ticket}")
             return True

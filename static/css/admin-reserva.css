@@ -1,0 +1,557 @@
+/* =================================================================
+   ADMIN RESERVAS - ESTILOS PERSONALIZADOS PARA AEROFLASH
+   ================================================================= */
+
+/* Variables CSS para consistencia */
+:root {
+    --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --success-color: #28a745;
+    --danger-color: #dc3545;
+    --warning-color: #ffc107;
+    --info-color: #17a2b8;
+    --light-bg: #f8f9fa;
+    --white: #ffffff;
+    --shadow-sm: 0 2px 4px rgba(0,0,0,0.1);
+    --shadow-md: 0 4px 6px rgba(0,0,0,0.15);
+    --shadow-lg: 0 8px 16px rgba(0,0,0,0.2);
+    --border-radius: 12px;
+    --border-radius-sm: 8px;
+    --transition: all 0.3s ease;
+}
+
+/* =================================================================
+   MODAL DE DETALLES DE RESERVA
+   ================================================================= */
+
+/* Modal principal */
+.modal-dialog.modal-reservation {
+    max-width: 800px;
+    margin: 1.75rem auto;
+}
+
+.modal-content.reservation-modal {
+    border: none;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-lg);
+    overflow: hidden;
+}
+
+/* Header del modal */
+.modal-header.reservation-header {
+    background: var(--primary-gradient);
+    color: var(--white);
+    border-bottom: none;
+    padding: 1.5rem 2rem;
+    position: relative;
+}
+
+.modal-header.reservation-header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(45deg, rgba(255,255,255,0.1) 0%, transparent 100%);
+    pointer-events: none;
+}
+
+.modal-title.reservation-title {
+    font-size: 1.4rem;
+    font-weight: 600;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.modal-title.reservation-title i {
+    font-size: 1.2rem;
+    opacity: 0.9;
+}
+
+.btn-close.reservation-close {
+    color: var(--white);
+    opacity: 0.8;
+    background: none;
+    border: none;
+    font-size: 1.2rem;
+    padding: 0.5rem;
+    border-radius: 50%;
+    transition: var(--transition);
+}
+
+.btn-close.reservation-close:hover {
+    opacity: 1;
+    background: rgba(255,255,255,0.1);
+    transform: scale(1.1);
+}
+
+/* Cuerpo del modal */
+.modal-body.reservation-body {
+    padding: 2rem;
+    background: var(--white);
+}
+
+/* Secciones de información */
+.reservation-section {
+    background: var(--light-bg);
+    border-radius: var(--border-radius-sm);
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    border-left: 4px solid var(--primary-gradient);
+    transition: var(--transition);
+}
+
+.reservation-section:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.reservation-section:last-child {
+    margin-bottom: 0;
+}
+
+.section-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.section-title i {
+    color: #667eea;
+    font-size: 1rem;
+}
+
+/* Grid de información */
+.info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+}
+
+.info-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.info-label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #666;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.info-value {
+    font-size: 1rem;
+    color: #333;
+    font-weight: 500;
+}
+
+.info-value.highlight {
+    color: #667eea;
+    font-weight: 600;
+}
+
+.info-value.price {
+    color: var(--success-color);
+    font-weight: 700;
+    font-size: 1.1rem;
+}
+
+/* Badges de estado */
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-transform: capitalize;
+}
+
+.status-badge.confirmado {
+    background: rgba(40, 167, 69, 0.1);
+    color: var(--success-color);
+    border: 1px solid rgba(40, 167, 69, 0.3);
+}
+
+.status-badge.cancelado {
+    background: rgba(220, 53, 69, 0.1);
+    color: var(--danger-color);
+    border: 1px solid rgba(220, 53, 69, 0.3);
+}
+
+.status-badge.pendiente {
+    background: rgba(255, 193, 7, 0.1);
+    color: var(--warning-color);
+    border: 1px solid rgba(255, 193, 7, 0.3);
+}
+
+/* Información de vuelo destacada */
+.flight-route {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    background: var(--white);
+    border-radius: var(--border-radius-sm);
+    border: 2px solid #e9ecef;
+    margin: 1rem 0;
+}
+
+.flight-location {
+    text-align: center;
+    flex: 1;
+}
+
+.flight-location .city {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #333;
+}
+
+.flight-location .time {
+    font-size: 0.9rem;
+    color: #666;
+    margin-top: 0.25rem;
+}
+
+.flight-arrow {
+    color: #667eea;
+    font-size: 1.5rem;
+    flex-shrink: 0;
+}
+
+/* Footer del modal */
+.modal-footer.reservation-footer {
+    background: var(--light-bg);
+    border-top: 1px solid #e9ecef;
+    padding: 1.5rem 2rem;
+    gap: 1rem;
+}
+
+.btn.reservation-btn {
+    border-radius: var(--border-radius-sm);
+    padding: 0.75rem 1.5rem;
+    font-weight: 600;
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.btn.reservation-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+}
+
+.btn-print {
+    background: var(--primary-gradient);
+    border: none;
+    color: var(--white);
+}
+
+.btn-print:hover {
+    background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+    color: var(--white);
+}
+
+/* =================================================================
+   TABLA DE RESERVAS
+   ================================================================= */
+
+/* Mejoras en la tabla */
+.table-reservations {
+    background: var(--white);
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+}
+
+.table-reservations thead th {
+    background: var(--primary-gradient);
+    color: var(--white);
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    letter-spacing: 0.5px;
+    border: none;
+    padding: 1rem 0.75rem;
+}
+
+.table-reservations tbody tr {
+    transition: var(--transition);
+    border-bottom: 1px solid #f1f3f4;
+}
+
+.table-reservations tbody tr:hover {
+    background: rgba(102, 126, 234, 0.05);
+    transform: scale(1.002);
+}
+
+.table-reservations tbody td {
+    padding: 1rem 0.75rem;
+    vertical-align: middle;
+    border: none;
+}
+
+/* Badges en tabla */
+.badge.seat-badge {
+    background: #6c757d;
+    color: var(--white);
+    padding: 0.4rem 0.8rem;
+    border-radius: 15px;
+    font-weight: 600;
+}
+
+.badge.status-confirmed {
+    background: rgba(40, 167, 69, 0.9);
+    color: var(--white);
+}
+
+.badge.status-cancelled {
+    background: rgba(220, 53, 69, 0.9);
+    color: var(--white);
+}
+
+.badge.status-pending {
+    background: rgba(255, 193, 7, 0.9);
+    color: var(--white);
+}
+
+/* Botones de acción */
+.btn-group.actions-group .btn {
+    border-radius: var(--border-radius-sm);
+    transition: var(--transition);
+    padding: 0.4rem 0.6rem;
+}
+
+.btn-group.actions-group .btn:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-sm);
+}
+
+/* =================================================================
+   ESTADO VACÍO
+   ================================================================= */
+
+.empty-state {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: #6c757d;
+}
+
+.empty-state i {
+    font-size: 4rem;
+    color: #dee2e6;
+    margin-bottom: 1rem;
+}
+
+.empty-state h5 {
+    color: #495057;
+    margin-bottom: 0.5rem;
+}
+
+/* =================================================================
+   NOTIFICACIONES
+   ================================================================= */
+
+.notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 9999;
+    padding: 1rem 1.5rem;
+    border-radius: var(--border-radius-sm);
+    box-shadow: var(--shadow-lg);
+    transition: var(--transition);
+    transform: translateX(100%);
+    max-width: 400px;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.notification.show {
+    transform: translateX(0);
+}
+
+.notification.success {
+    background: var(--success-color);
+    color: var(--white);
+}
+
+.notification.error {
+    background: var(--danger-color);
+    color: var(--white);
+}
+
+.notification.info {
+    background: var(--info-color);
+    color: var(--white);
+}
+
+.notification.warning {
+    background: var(--warning-color);
+    color: #212529;
+}
+
+/* =================================================================
+   LOADING STATES
+   ================================================================= */
+
+.loading-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.9);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+    border-radius: var(--border-radius);
+}
+
+.loading-spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #667eea;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* =================================================================
+   RESPONSIVE DESIGN
+   ================================================================= */
+
+@media (max-width: 768px) {
+    .modal-dialog.modal-reservation {
+        margin: 0.5rem;
+        max-width: none;
+    }
+    
+    .modal-body.reservation-body {
+        padding: 1.5rem 1rem;
+    }
+    
+    .info-grid {
+        grid-template-columns: 1fr;
+        gap: 0.75rem;
+    }
+    
+    .flight-route {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .flight-arrow {
+        transform: rotate(90deg);
+    }
+    
+    .modal-footer.reservation-footer {
+        flex-direction: column;
+        padding: 1rem;
+    }
+    
+    .btn.reservation-btn {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+@media (max-width: 576px) {
+    .table-responsive {
+        font-size: 0.875rem;
+    }
+    
+    .btn-group.actions-group {
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+    
+    .modal-header.reservation-header {
+        padding: 1rem;
+    }
+    
+    .modal-title.reservation-title {
+        font-size: 1.2rem;
+    }
+}
+
+/* =================================================================
+   ANIMACIONES ADICIONALES
+   ================================================================= */
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideInRight {
+    from {
+        opacity: 0;
+        transform: translateX(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.reservation-section {
+    animation: fadeInUp 0.4s ease-out;
+}
+
+.reservation-section:nth-child(2) {
+    animation-delay: 0.1s;
+}
+
+.reservation-section:nth-child(3) {
+    animation-delay: 0.2s;
+}
+
+/* =================================================================
+   UTILIDADES
+   ================================================================= */
+
+.text-primary-custom {
+    color: #667eea !important;
+}
+
+.bg-primary-custom {
+    background: var(--primary-gradient) !important;
+}
+
+.border-primary-custom {
+    border-color: #667eea !important;
+}
+
+.shadow-custom {
+    box-shadow: var(--shadow-md) !important;
+}
+
+.rounded-custom {
+    border-radius: var(--border-radius) !important;
+}

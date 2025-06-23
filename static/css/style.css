@@ -1013,3 +1013,35 @@ body {
         font-size: 0.9rem;
     }
 }
+
+.seat {
+    display: inline-block;
+    width: 40px;
+    height: 40px;
+    margin: 5px;
+    border: 2px solid #00bcd4;
+    border-radius: 8px;
+    text-align: center;
+    line-height: 38px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: 0.2s ease;
+}
+
+.seat.available {
+    background-color: white;
+    color: #00bcd4;
+}
+
+.seat.occupied {
+    background-color: #e57373;
+    color: white;
+    border-color: #e57373;
+    cursor: not-allowed;
+}
+
+.seat.selected {
+    background-color: #4caf50;
+    color: white;
+    border-color: #4caf50;
+}
